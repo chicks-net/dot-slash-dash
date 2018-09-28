@@ -1,0 +1,17 @@
+#!/usr/bin/perl
+
+use strict;
+use warnings;
+#use LWP::Simple;
+use LWP;
+
+my $browser = LWP::UserAgent->new;
+$browser->agent("dash-weather/0.0 (curl compatible)");
+
+my $url = 'http://wttr.in/San+Francisco?n';
+#my $content = get $url;
+my $response = $browser->get($url);
+print "Content-type: " . $response->content_type, "\n";
+my $content = $response->content;
+die "Couldn't get $url" unless defined $content;
+print $content;
