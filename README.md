@@ -5,6 +5,8 @@ ascii-art dashboard
 
 The `dash_lay.txt` is like a mini-spreadsheet.  If you have a layout like this:
 
+| A | B | C |
+| :-- | :-- | :-- |
 | `A1` |  `B1` |  `C1` |
 |  |  `B2` |  `C2` |
 |  |   |  `C3` |
