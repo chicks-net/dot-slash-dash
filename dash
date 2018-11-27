@@ -33,7 +33,9 @@ die "still nothing";
 sub find_dimensions {
 	my ($layout) = @_;
 
+	my %columns;
 	foreach my $cell (keys %$layout) {
+		my $column = substr($cell,0,1); # don't try more than 26 columns
 		my $request = $layout->{$cell}->{request};
 
 		if (defined( $dimensions{$request} )) {
@@ -44,7 +46,19 @@ sub find_dimensions {
 			$layout->{$cell}->{width} = $dimensions{'default'}->{width};
 			$layout->{$cell}->{height} = $dimensions{'default'}->{height};
 		}
+		my $width = $layout->{$cell}->{width};
+		if ($width > $columns{$column}) {
+			$columns{$column} = $width;
+		}
 	}
+
+	my $overall_width = ( (scalar keys %columns) -1 ) * 3; # 3 spaces between columns
+	foreach my $column (keys %columns) {
+		$overall_width += $columns{$column};
+	}
+	$columns{total} = $overall_width;
+
+	$layout->{_column_widths} = \%columns;
 }
 
 #
