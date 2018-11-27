@@ -6,7 +6,65 @@ use Data::Dumper;
 use File::Slurp qw(read_file);
 use JSON::MaybeXS qw(decode_json);
 
-die "nothing";
+# constants
+my $layout_filename = 'dash_lay.txt';
+my %dimensions = (
+	default => {
+		width => 12,
+		height => 4,
+	},
+	users => {
+		width => 50,
+		height => '*',
+	},
+);
+
+# main:
+my $layout = read_layout();
+find_dimensions($layout);
+print Dumper($layout);
+
+die "still nothing";
+
+#
+# handle cells within layout
+#
+
+sub find_dimensions {
+	my ($layout) = @_;
+
+	foreach my $cell (keys %$layout) {
+		my $request = $layout->{$cell}->{request};
+
+		if (defined( $dimensions{$request} )) {
+			$layout->{$cell}->{width} = $dimensions{$request}->{width};
+			$layout->{$cell}->{height} = $dimensions{$request}->{height};
+		} else {
+			# default
+			$layout->{$cell}->{width} = $dimensions{'default'}->{width};
+			$layout->{$cell}->{height} = $dimensions{'default'}->{height};
+		}
+	}
+}
+
+#
+# top of layout - dash_lay.txt
+#
+
+sub read_layout {
+	# no arguments
+	my %layout;
+	my @layout_lines = read_file($layout_filename);
+	foreach my $lay_line (@layout_lines) {
+		chomp($lay_line);
+		my ($cell, $contents) = split(/:\s+/,$lay_line);
+
+		$layout{$cell} = {
+			request => $contents,
+		};
+	}
+	return (\%layout);
+}
 
 #
 # utility functions
