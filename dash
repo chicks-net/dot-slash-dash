@@ -1,0 +1,24 @@
+#!/usr/bin/env perl
+
+use strict;
+use warnings;
+use Data::Dumper;
+use File::Slurp qw(read_file);
+use JSON::MaybeXS qw(decode_json);
+
+die "nothing";
+
+#
+# utility functions
+#
+
+sub read_json {
+	my ($json_filename) = @_;
+	my $file_contents = read_file($json_filename);
+
+	my $json = JSON::MaybeXS->new->allow_nonref;
+	my $js_ref = $json->decode($file_contents);
+	die "no ref back from json->decode()" unless $js_ref;
+
+	return $js_ref;
+}
