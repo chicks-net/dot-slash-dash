@@ -14,7 +14,7 @@ my $layout = read_layout();
 my $plugins = read_plugins();
 find_dimensions($layout,$plugins);
 
-event_loop(); # research other event looks
+event_loop(); # research other event loops
 
 sub event_loop {
 	while (1) { # until ctrl-c
@@ -22,6 +22,7 @@ sub event_loop {
 		foreach my $cell (sort keys %$layout) {
 			next if $cell =~ /^_/; # skip hidden keys
 			my $command = $layout->{$cell}->{command};
+			# TODO: handle ANSI graphics
 			my $out = `$command`;
 			my @lines = split(/\n/,$out);
 			$layout->{$cell}->{output} = \@lines;
@@ -93,12 +94,14 @@ sub find_dimensions {
 		}
 	}
 
+	# overall width
 	my $overall_width = ( (scalar keys %columns) -1 ) * 3; # 3 spaces between columns
 	foreach my $column (keys %columns) {
 		$overall_width += $columns{$column};
 	}
 	$columns{total} = $overall_width;
 
+	# stuff into 'hidden' column.
 	$layout->{_column_widths} = \%columns;
 }
 
