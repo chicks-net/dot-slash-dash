@@ -1,0 +1,6 @@
+{
+	"name": "users",
+	"command": "who",
+	"width": 49,
+	"height": "*"
+}

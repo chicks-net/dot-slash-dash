@@ -8,46 +8,54 @@ use JSON::MaybeXS qw(decode_json);
 
 # constants
 my $layout_filename = 'dash_lay.txt';
-my %dimensions = (
-	default => {
-		width => 12,
-		height => 4,
-	},
-	users => {
-		width => 50,
-		height => '*',
-	},
-);
 
 # main:
 my $layout = read_layout();
-find_dimensions($layout);
+my $plugins = read_plugins();
+find_dimensions($layout,$plugins);
 print Dumper($layout);
 
+event_loop(); # research other event looks
+
 die "still nothing";
+
+sub event_loop {
+	while (1) { # until ctrl-c
+		foreach my $cell (sort keys %$layout) {
+			next if $cell =~ /^_/; # skip hidden keys
+			my $command = $layout->{$cell}->{command};
+			my $out = `$command`;
+			my @lines = split(/\n/,$out);
+			$layout->{$cell}->{output} = \@lines;
+		}
+print Dumper($layout);
+warn "loopy";
+		sleep(5);
+	}
+}
 
 #
 # handle cells within layout
 #
 
 sub find_dimensions {
-	my ($layout) = @_;
+	my ($layout,$plugins) = @_;
 
 	my %columns;
 	foreach my $cell (keys %$layout) {
 		my $column = substr($cell,0,1); # don't try more than 26 columns
 		my $request = $layout->{$cell}->{request};
 
-		if (defined( $dimensions{$request} )) {
-			$layout->{$cell}->{width} = $dimensions{$request}->{width};
-			$layout->{$cell}->{height} = $dimensions{$request}->{height};
+		if (defined( $plugins->{$request} )) {
+			$layout->{$cell} = $plugins->{$request};
 		} else {
 			# default
-			$layout->{$cell}->{width} = $dimensions{'default'}->{width};
-			$layout->{$cell}->{height} = $dimensions{'default'}->{height};
+			$layout->{$cell} = $plugins->{'default'};
+			# TODO: a fresh hash each time
+			# TODO: include `echo $cell/$name` before `echo unimplemented`
 		}
 		my $width = $layout->{$cell}->{width};
-		if ($width > $columns{$column}) {
+		if ($width > ($columns{$column} || 0)) {
 			$columns{$column} = $width;
 		}
 	}
@@ -59,6 +67,34 @@ sub find_dimensions {
 	$columns{total} = $overall_width;
 
 	$layout->{_column_widths} = \%columns;
+}
+
+sub read_plugins {
+	my %plugins = (
+		default => {
+			width => 14,
+			height => 2,
+			name => 'default',
+			command => "echo 'unimplemented'",
+		},
+	);
+
+	my $plugins_dir = "dash_cells";
+	opendir(PLUGINS,$plugins_dir) or die "could not opendir $plugins_dir: $!";
+	my @plugin_files = readdir(PLUGINS);
+	closedir(PLUGINS);
+
+	foreach my $plugin_file (@plugin_files) {
+		next if $plugin_file =~ /^[.]/; # skip hidden
+		next unless $plugin_file =~ /[.]json$/; # skip unless json
+		print "== $plugin_file\n";
+		my $hash = read_json("$plugins_dir/$plugin_file");
+		my $name = $hash->{name};
+		$plugins{$name} = $hash;
+	}
+
+	#print Dumper(\%plugins);
+	return(\%plugins);
 }
 
 #
