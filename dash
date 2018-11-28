@@ -13,14 +13,12 @@ my $layout_filename = 'dash_lay.txt';
 my $layout = read_layout();
 my $plugins = read_plugins();
 find_dimensions($layout,$plugins);
-print Dumper($layout);
 
 event_loop(); # research other event looks
 
-die "still nothing";
-
 sub event_loop {
 	while (1) { # until ctrl-c
+		# update contents
 		foreach my $cell (sort keys %$layout) {
 			next if $cell =~ /^_/; # skip hidden keys
 			my $command = $layout->{$cell}->{command};
@@ -28,9 +26,44 @@ sub event_loop {
 			my @lines = split(/\n/,$out);
 			$layout->{$cell}->{output} = \@lines;
 		}
-print Dumper($layout);
-warn "loopy";
+
+		print_layout($layout);
 		sleep(5);
+	}
+}
+
+sub print_layout {
+	my ($layout) = @_;
+
+	# build line format
+	my $column_widths = $layout->{_column_widths};
+	my $line_format = '';
+	foreach my $column (sort keys %$column_widths) {
+		next if $column eq 'total';
+		$line_format .= ' %' . $column_widths->{$column} . 's |';
+	}
+	$line_format .= "\n";
+
+	# gather column lines
+	my %column_contents;
+	foreach my $column (sort keys %$column_widths) {
+		next if $column eq 'total';
+		foreach my $cell (sort keys %$layout) {
+			next if $cell =~ /^_/; # skip hidden keys
+			next unless $cell =~ /^$column/;
+			push( @{ $column_contents{$column} }, @{ $layout->{$cell}->{output} });
+			push( @{ $column_contents{$column} }, '=' x $column_widths->{$column} );
+		}
+	}
+
+	# print scan lines
+	for (my $row_index = 0; $row_index < 25 ; $row_index++) {
+		my @row_parts;
+		foreach my $column (sort keys %$column_widths) {
+			next if $column eq 'total';
+			push(@row_parts,$column_contents{$column}->[$row_index] || '');
+		}
+		printf($line_format,@row_parts);
 	}
 }
 
@@ -87,7 +120,6 @@ sub read_plugins {
 	foreach my $plugin_file (@plugin_files) {
 		next if $plugin_file =~ /^[.]/; # skip hidden
 		next unless $plugin_file =~ /[.]json$/; # skip unless json
-		print "== $plugin_file\n";
 		my $hash = read_json("$plugins_dir/$plugin_file");
 		my $name = $hash->{name};
 		$plugins{$name} = $hash;
