@@ -27,7 +27,7 @@ You can
 * have 1-n rows in each column
 * up to 26 columns `A` through `Z`
 
-Here is an [example `dash_lay.txt`](dash_lay.txt) for the above layout:
+Here is an [example `dash_lay.txt`](dash_lay_readme.txt) for the above layout:
 
 ```
 A1: users
