@@ -1,0 +1,6 @@
+{
+	"name": "time_utc",
+	"command": "TZ=UTC date",
+	"width": 29,
+	"height": "1"
+}

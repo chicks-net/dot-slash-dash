@@ -1,0 +1,6 @@
+{
+	"name": "time_now",
+	"command": "date",
+	"width": 29,
+	"height": "1"
+}
