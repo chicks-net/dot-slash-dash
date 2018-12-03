@@ -41,7 +41,7 @@ sub print_layout {
 	my $line_format = '';
 	foreach my $column (sort keys %$column_widths) {
 		next if $column eq 'total';
-		$line_format .= ' %' . $column_widths->{$column} . 's |';
+		$line_format .= ' %-' . $column_widths->{$column} . 's |';
 	}
 	$line_format .= "\n";
 
