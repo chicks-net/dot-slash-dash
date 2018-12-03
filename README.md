@@ -6,7 +6,21 @@
 
 ascii-art dashboard
 
-## layout
+## example
+
+TODO after more development...
+
+## usage and configuration
+
+Run
+
+```
+./dash
+```
+
+to see it go.
+
+### layout
 
 The `dash_lay.txt` is like a mini-spreadsheet.  If you have a layout like this:
 
@@ -37,3 +51,13 @@ C1: todo.todo
 C2: todo.done
 C3: todo.touched_today
 ```
+
+### content modules
+
+Existing content modules are defined in [`dash_cells/`](dash_cells/).  Currently we have:
+
+* `users` shows the currently logged in users
+* `time_now` shows the current time in the local time zone
+* `time_utc` shows the current itme in UTC
+
+New cells can be created by adding configuration files in [`dash_cells/`](dash_cells/).
